@@ -3,25 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VGFit - Fitness & Bodybuilding</title>
+    <title>OptiTrain</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div id="app">
-    <!-- Content will be dynamically inserted here -->
+    <div class="screen loading-screen">
+        <img src="assets/Logo.png" alt="Logo">
+    </div>
+
+    <div class="screen welcome-screen" style="display: none;">
+        <h1>Bienvenido a OptiTrain</h1>
+        <button class="btn" id="loginBtn">Iniciar Sesión</button>
+        <button class="btn btn-secondary" id="registerBtn">Registrarse</button>
+    </div>
+
+    <div class="screen login-screen" style="display: none;">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <input type="email" placeholder="Correo electrónico" id="loginEmail" required>
+            <input type="password" placeholder="Contraseña" id="loginPassword" required>
+            <button type="submit" class="btn">Iniciar Sesión</button>
+        </form>
+        <p id="loginError" class="error-message"></p>
+        <p class="redirect-text">¿No tienes una cuenta? <a href="#" id="goToRegister">Regístrate aquí</a></p>
+    </div>
+
+    <div class="screen register-screen" style="display: none;">
+        <h2>Registrarse</h2>
+        <form id="registerForm">
+            <input type="text" placeholder="Nombre de usuario" id="registerUsername" required>
+            <input type="email" placeholder="Correo electrónico" id="registerEmail" required>
+            <input type="password" placeholder="Contraseña" id="registerPassword" required>
+            <input type="password" placeholder="Confirmar contraseña" id="confirmPassword" required>
+            <label>
+                <input type="checkbox" id="termsCheckbox" required>
+                Acepto los términos y condiciones
+            </label>
+            <button type="submit" class="btn">Registrarse</button>
+        </form>
+        <p id="registerError" class="error-message"></p>
+        <p class="redirect-text">¿Ya tienes una cuenta? <a href="#" id="goToLogin">Inicia sesión aquí</a></p>
+    </div>
+
+    <div class="screen routine-list-screen" style="display: none;">
+        <h2>Rutinas</h2>
+        <div id="routineList"></div>
+    </div>
+
+    <div class="screen routine-view-screen" style="display: none;">
+        <div class="routine-header">
+            <h2 id="routineName"></h2>
+            <button class="btn" id="addExerciseBtn">Agregar Ejercicio</button>
+        </div>
+        <div id="exerciseList" class="exercise-list"></div>
+    </div>
+
+    <div class="screen stats-screen" style="display: none;">
+        <h2>Estadísticas</h2>
+        <h3>Historial Diario</h3>
+        <div id="dailyStats"></div>
+        <h3>Progreso por Rutina</h3>
+        <div id="routineProgress"></div>
+    </div>
+
+    <div class="screen profile-screen" style="display: none;">
+        <h2>Perfil</h2>
+        <div id="profileInfo" class="profile-item"></div>
+        <button class="btn" id="logoutBtn">Cerrar Sesión</button>
+    </div>
+
+    <nav class="bottom-nav" style="display: none;">
+        <button id="routinesNavBtn">
+            <img src="assets/Rutines.svg" alt="Rutinas">
+            Rutinas
+        </button>
+        <button id="statsNavBtn">
+            <img src="assets/Calendar.svg" alt="Estadísticas">
+            Estadísticas
+        </button>
+        <button id="profileNavBtn">
+            <img src="assets/Profile.svg" alt="Perfil">
+            Perfil
+        </button>
+    </nav>
 </div>
+
 <div id="modal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Agregar Ejercicio</h2>
-        <label for="exerciseSelect">
-            <select id="exerciseSelect">
-
-            </select>
-        </label>
-        <button id="addExerciseBtn" class="btn">Agregar</button>
+        <select id="exerciseSelect"></select>
+        <button id="addExerciseConfirmBtn" class="btn">Agregar</button>
     </div>
 </div>
+
 <script src="app.js"></script>
 </body>
 </html>

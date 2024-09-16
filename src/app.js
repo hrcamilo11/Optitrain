@@ -1,9 +1,5 @@
-const app = document.getElementById('app');
-const modal = document.getElementById('modal');
-const closeBtn = document.getElementsByClassName('close')[0];
-const addExerciseBtn = document.getElementById('addExerciseBtn');
-
-const routines = [
+// Data structures
+let routines = [
     { id: 1, name: 'Abdominales', exercises: [], optionalExercises: [] },
     { id: 2, name: 'Espalda', exercises: [], optionalExercises: [] },
     { id: 3, name: 'Biceps', exercises: [], optionalExercises: [] },
@@ -107,82 +103,91 @@ const allExercises = [
     { id: 84, name: 'Step-up', routineId: 7 }
 ];
 
-// Preload 7 exercises for each routine and the rest as optional
-routines.forEach(routine => {
-    const routineExercises = allExercises.filter(exercise => exercise.routineId === routine.id);
-    routine.exercises = routineExercises.slice(0, 7);
-    routine.optionalExercises = routineExercises.slice(7);
-});
-
+// Global variables
 let userExercises = JSON.parse(localStorage.getItem('userExercises')) || {};
 let dailyExercises = JSON.parse(localStorage.getItem('dailyExercises')) || {};
 let users = JSON.parse(localStorage.getItem('users')) || [];
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
+
+// DOM elements
+const app = document.getElementById('app');
+const modal = document.getElementById('modal');
+const closeBtn = document.querySelector('.close');
+const addExerciseBtn = document.getElementById('addExerciseBtn');
+const addExerciseConfirmBtn = document.getElementById('addExerciseConfirmBtn');
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    preloadData();
+    showLoadingScreen();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+
+    document.getElementById('loginBtn').addEventListener('click', showLoginScreen);
+    document.getElementById('registerBtn').addEventListener('click', showRegisterScreen);
+    document.getElementById('goToRegister').addEventListener('click', showRegisterScreen);
+    document.getElementById('goToLogin').addEventListener('click', showLoginScreen);
+    document.getElementById('loginForm').addEventListener('submit', login);
+    document.getElementById('registerForm').addEventListener('submit', register);
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    document.getElementById('routinesNavBtn').addEventListener('click', showRoutineList);
+    document.getElementById('statsNavBtn').addEventListener('click', showStatsScreen);
+    document.getElementById('profileNavBtn').addEventListener('click', showProfileScreen);
+    closeBtn.addEventListener('click', () => modal.style.display = "none");
+    window.addEventListener('click', (event) => {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    });
+    addExerciseConfirmBtn.addEventListener('click', addExerciseToRoutine);
+}
+
+// Functions
+function preloadData() {
+    routines.forEach(routine => {
+        const routineExercises = allExercises.filter(exercise => exercise.routineId === routine.id);
+        routine.exercises = routineExercises.slice(0, 7);
+        routine.optionalExercises = routineExercises.slice(7);
+    });
+}
+
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => screen.style.display = 'none');
+    document.querySelector('.bottom-nav').style.display = 'none';
+}
 
 function showLoadingScreen() {
-    app.innerHTML = `
-        <div class="screen loading-screen">
-            <img src="assets/leonardo_phoenix_design_a_sleek_and_modern_logo_for_the_optitr_3_79881c57-ffc4-4277-bbee-b228e8697300-removebg-preview.png" 
-            alt="Logo">
-        </div>
-    `;
+    hideAllScreens();
+    document.querySelector('.loading-screen').style.display = 'flex';
     setTimeout(showWelcomeScreen, 5000);
 }
 
 function showWelcomeScreen() {
-    app.innerHTML = `
-        <div class="screen welcome-screen">
-            <h1>Bienvenido a OptiTrain</h1>
-            <button class="btn" onclick="showLoginScreen()">Iniciar Sesión</button>
-            <button class="btn btn-secondary" onclick="showRegisterScreen()">Registrarse</button>
-        </div>
-    `;
+    hideAllScreens();
+    document.querySelector('.welcome-screen').style.display = 'flex';
 }
 
 function showLoginScreen() {
-    app.innerHTML = `
-        <div class="screen login-screen">
-            <h2>Iniciar Sesión</h2>
-            <form onsubmit="login(event)">
-                <input type="email" placeholder="Correo electrónico" id="email" required>
-                <input type="password" placeholder="Contraseña" id="password" required>
-                <button type="submit" class="btn">Iniciar Sesión</button>
-            </form>
-            <p id="loginError" class="error-message"></p>
-            <p class="redirect-text">¿No tienes una cuenta? <a href="#" onclick="showRegisterScreen()">Regístrate aquí</a></p>
-        </div>
-    `;
+    hideAllScreens();
+    document.querySelector('.login-screen').style.display = 'flex';
 }
 
 function showRegisterScreen() {
-    app.innerHTML = `
-        <div class="screen register-screen">
-            <h2>Registrarse</h2>
-            <form onsubmit="register(event)">
-                <input type="text" placeholder="Nombre de usuario" id="username" required>
-                <input type="email" placeholder="Correo electrónico" id="email" required>
-                <input type="password" placeholder="Contraseña" id="password" required>
-                <input type="password" placeholder="Confirmar contraseña" id="confirmPassword" required>
-                <label>
-                    <input type="checkbox" id="termsCheckbox" required>
-                    Acepto los términos y condiciones
-                </label>
-                <button type="submit" class="btn">Registrarse</button>
-            </form>
-            <p id="registerError" class="error-message"></p>
-            <p class="redirect-text">¿Ya tienes una cuenta? <a href="#" onclick="showLoginScreen()">Inicia sesión aquí</a></p>
-        </div>
-    `;
+    hideAllScreens();
+    document.querySelector('.register-screen').style.display = 'flex';
 }
 
 function login(event) {
     event.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
     const user = users.find(u => u.email === email && u.password === password);
     if (user) {
         currentUser = user;
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
         showRoutineList();
     } else {
         document.getElementById('loginError').textContent = 'Correo electrónico o contraseña incorrectos';
@@ -191,9 +196,9 @@ function login(event) {
 
 function register(event) {
     event.preventDefault();
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    const username = document.getElementById('registerUsername').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const termsCheckbox = document.getElementById('termsCheckbox').checked;
 
@@ -221,70 +226,68 @@ function register(event) {
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));
     currentUser = newUser;
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    showRoutine
-    List();
+    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+    showRoutineList();
 }
 
 function showRoutineList() {
-    let routineListHTML = routines.map(routine => {
-        const activeExercises = routine.exercises.filter(e => !userExercises[e.id]);
-        return `
-            <div class="routine-item" onclick="showRoutineView(${routine.id})">
-                <h3>${routine.name}</h3>
-                <p>${activeExercises.length} ejercicios</p>
-            </div>
-        `;
-    }).join('');
+    hideAllScreens();
+    document.querySelector('.routine-list-screen').style.display = 'block';
+    document.querySelector('.bottom-nav').style.display = 'flex';
 
-    app.innerHTML = `
-        <div class="exercise-list">
-            <h2>Rutinas</h2>
-            ${routineListHTML}
-        </div>
-        ${createBottomNav()}
-    `;
+    const routineListElement = document.getElementById('routineList');
+    routineListElement.innerHTML = '';
+
+    routines.forEach(routine => {
+        const activeExercises = routine.exercises.filter(e => !userExercises[e.id]);
+        const routineItem = document.createElement('div');
+        routineItem.className = 'routine-item';
+        routineItem.innerHTML = `
+            <h3>${routine.name}</h3>
+            <p>${activeExercises.length} ejercicios</p>
+        `;
+        routineItem.addEventListener('click', () => showRoutineView(routine.id));
+        routineListElement.appendChild(routineItem);
+    });
 }
 
 function showRoutineView(routineId) {
+    hideAllScreens();
+    document.querySelector('.routine-view-screen').style.display = 'block';
+    document.querySelector('.bottom-nav').style.display = 'flex';
+
     const routine = routines.find(r => r.id === routineId);
-    let exerciseListHTML = routine.exercises.map(exercise => `
-        <div class="exercise-item ${userExercises[exercise.id] ? 'completed' : ''}" id="exercise-${exercise.id}">
+    document.getElementById('routineName').textContent = routine.name;
+
+    const exerciseListElement = document.getElementById('exerciseList');
+    exerciseListElement.innerHTML = '';
+
+    routine.exercises.forEach(exercise => {
+        const exerciseItem = document.createElement('div');
+        exerciseItem.className = `exercise-item ${userExercises[exercise.id] ? 'completed' : ''}`;
+        exerciseItem.id = `exercise-${exercise.id}`;
+        exerciseItem.innerHTML = `
             <h3>${exercise.name}</h3>
             <label>
-                <input type="checkbox" onchange="toggleExercise(${exercise.id}, ${routineId})" 
-                ${userExercises[exercise.id] ? 'checked' : ''}>
+                <input type="checkbox" ${userExercises[exercise.id] ? 'checked' : ''}>
                 Completado
             </label>
-        </div>
-    `).join('');
+        `;
+        exerciseItem.querySelector('input').addEventListener('change', () => toggleExercise(exercise.id, routineId));
+        exerciseListElement.appendChild(exerciseItem);
 
-    app.innerHTML = `
-        <div class="routine-view">
-            <div class="routine-header">
-                <h2>${routine.name}</h2>
-                <button class="btn" onclick="showAddExerciseModal(${routineId})">Agregar Ejercicio</button>
-            </div>
-            <div class="exercise-list">
-                ${exerciseListHTML}
-            </div>
-        </div>
-        ${createBottomNav()}
-    `;
-
-    // Hide completed exercises
-    routine.exercises.forEach(exercise => {
         if (userExercises[exercise.id]) {
-            const exerciseElement = document.getElementById(`exercise-${exercise.id}`);
-            if (exerciseElement) {
-                exerciseElement.style.display = 'none';
-            }
+            exerciseItem.style.display = 'none';
         }
     });
+
+    addExerciseBtn.onclick = () => showAddExerciseModal(routineId);
 }
 
 function toggleExercise(exerciseId, routineId) {
     const today = new Date().toISOString().split('T')[0];
+    const exerciseElement = document.getElementById(`exercise-${exerciseId}`);
+
     if (!userExercises[exerciseId]) {
         userExercises[exerciseId] = true;
         if (!dailyExercises[today]) {
@@ -292,7 +295,6 @@ function toggleExercise(exerciseId, routineId) {
         }
         dailyExercises[today].push(exerciseId);
 
-        const exerciseElement = document.getElementById(`exercise-${exerciseId}`);
         exerciseElement.classList.add('completed');
         exerciseElement.style.animation = 'fadeOut 0.5s';
         setTimeout(() => {
@@ -304,7 +306,6 @@ function toggleExercise(exerciseId, routineId) {
             dailyExercises[today] = dailyExercises[today].filter(id => id !== exerciseId);
         }
 
-        const exerciseElement = document.getElementById(`exercise-${exerciseId}`);
         exerciseElement.classList.remove('completed');
         exerciseElement.style.animation = 'none';
         exerciseElement.style.display = 'block';
@@ -315,16 +316,18 @@ function toggleExercise(exerciseId, routineId) {
 
 function showAddExerciseModal(routineId) {
     const routine = routines.find(r => r.id === routineId);
-    let exerciseOptionsHTML = routine.optionalExercises.map(exercise => `
-        <option value="${exercise.id}">${exercise.name}</option>
-    `).join('');
+    const selectElement = document.getElementById('exerciseSelect');
+    selectElement.innerHTML = '';
 
-    document.getElementById('exerciseSelect').innerHTML = exerciseOptionsHTML;
+    routine.optionalExercises.forEach(exercise => {
+        const option = document.createElement('option');
+        option.value = exercise.id;
+        option.textContent = exercise.name;
+        selectElement.appendChild(option);
+    });
+
     modal.style.display = "block";
-
-    addExerciseBtn.onclick = function() {
-        addExerciseToRoutine(routineId);
-    }
+    addExerciseConfirmBtn.onclick = () => addExerciseToRoutine(routineId);
 }
 
 function addExerciseToRoutine(routineId) {
@@ -343,42 +346,45 @@ function addExerciseToRoutine(routineId) {
 }
 
 function showStatsScreen() {
-    let dailyStatsHTML = '';
+    hideAllScreens();
+    document.querySelector('.stats-screen').style.display = 'block';
+    document.querySelector('.bottom-nav').style.display = 'flex';
+
+    const dailyStatsElement = document.getElementById('dailyStats');
+    dailyStatsElement.innerHTML = '';
     Object.entries(dailyExercises).forEach(([date, exercises]) => {
-        dailyStatsHTML += `
-            <div class="stats-item">
-                <h3>${date}</h3>
-                <p>Ejercicios completados: ${exercises.length}</p>
-            </div>
+        const statsItem = document.createElement('div');
+        statsItem.className = 'stats-item';
+        statsItem.innerHTML = `
+            <h3>${date}</h3>
+            <p>Ejercicios completados: ${exercises.length}</p>
         `;
+        dailyStatsElement.appendChild(statsItem);
     });
 
-    let routineProgressHTML = routines.map(routine => {
+    const routineProgressElement = document.getElementById('routineProgress');
+    routineProgressElement.innerHTML = '';
+    routines.forEach(routine => {
         const completedRoutineExercises = routine.exercises.filter(e => userExercises[e.id]).length;
         const progress = (completedRoutineExercises / routine.exercises.length) * 100;
-        const resetButton = progress === 100 ? `<button class="btn" onclick="resetRoutine(${routine.id})">Reiniciar Rutina</button>` : '';
-        return `
-            <div class="stats-item">
-                <h3>${routine.name}</h3>
-                <div class="progress-bar">
-                    <div class="progress" style="width: ${progress}%"></div>
-                </div>
-                <p>${Math.round(progress)}% completado</p>
-                ${resetButton}
+        const statsItem = document.createElement('div');
+        statsItem.className = 'stats-item';
+        statsItem.innerHTML = `
+            <h3>${routine.name}</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: ${progress}%"></div>
             </div>
+            <p>${Math.round(progress)}% completado</p>
         `;
-    }).join('');
-
-    app.innerHTML = `
-        <div class="stats-screen">
-            <h2>Estadísticas</h2>
-            <h3>Historial Diario</h3>
-            ${dailyStatsHTML}
-            <h3>Progreso por Rutina</h3>
-            ${routineProgressHTML}
-        </div>
-        ${createBottomNav()}
-    `;
+        if (progress === 100) {
+            const resetButton = document.createElement('button');
+            resetButton.className = 'btn';
+            resetButton.textContent = 'Reiniciar Rutina';
+            resetButton.addEventListener('click', () => resetRoutine(routine.id));
+            statsItem.appendChild(resetButton);
+        }
+        routineProgressElement.appendChild(statsItem);
+    });
 }
 
 function resetRoutine(routineId) {
@@ -391,62 +397,32 @@ function resetRoutine(routineId) {
 }
 
 function showProfileScreen() {
+    hideAllScreens();
+    document.querySelector('.profile-screen').style.display = 'block';
+    document.querySelector('.bottom-nav').style.display = 'flex';
+
     const completedExercises = Object.keys(userExercises).length;
     const totalExercises = routines.reduce((sum, routine) => sum + routine.exercises.length, 0);
+    const progress = Math.round((completedExercises / totalExercises) * 100);
 
-    app.innerHTML = `
-        <div class="profile-screen">
-            <h2>Perfil</h2>
-            <div class="profile-item">
-                <p>Nombre de usuario: ${currentUser.username}</p>
-                <p>Correo electrónico: ${currentUser.email}</p>
-                <p>Total de ejercicios realizados: ${completedExercises}</p>
-                <h3>Progreso General</h3>
-                <p>Ejercicios completados: ${completedExercises}</p>
-                <p>Total de ejercicios: ${totalExercises}</p>
-                <p>Progreso: ${Math.round((completedExercises / totalExercises) * 100)}%</p>
-            </div>
-            <button class="btn" onclick="logout()">Cerrar Sesión</button>
-        </div>
-        ${createBottomNav()}
+    const profileInfoElement = document.getElementById('profileInfo');
+    profileInfoElement.innerHTML = `
+        <p>Nombre de usuario: ${currentUser.username}</p>
+        <p>Correo electrónico: ${currentUser.email}</p>
+        <p>Total de ejercicios realizados: ${completedExercises}</p>
+        <h3>Progreso General</h3>
+        <p>Ejercicios completados: ${completedExercises}</p>
+        <p>Total de ejercicios: ${totalExercises}</p>
+        <p>Progreso: ${progress}%</p>
     `;
 }
 
 function logout() {
     currentUser = null;
-    localStorage.removeItem('currentUser');
+    sessionStorage.removeItem('currentUser');
     showWelcomeScreen();
 }
 
-function createBottomNav() {
-    return `
-        <nav class="bottom-nav">
-            <button onclick="showRoutineList()">
-                <img src="assets/weightlifting-gym-svgrepo-com.svg" alt="Rutinas">
-                Rutinas
-            </button>
-            <button onclick="showStatsScreen()">
-                <img src="assets/training-gym-svgrepo-com.svg" alt="Estadísticas">
-                Estadísticas
-            </button>
-            <button onclick="showProfileScreen()">
-                <img src="assets/dumbbell-gym-svgrepo-com.svg" alt="Perfil">
-                Perfil
-            </button>
-        </nav>
-    `;
-}
-
-// Modal event listeners
-closeBtn.onclick = function() {
-    modal.style.display = "none";
-}
-
-window.onclick = function(event) {
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
-}
 
 // Start the application
 showLoadingScreen();

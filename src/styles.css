@@ -3,14 +3,24 @@ body, html {
     padding: 0;
     font-family: Arial, sans-serif;
     height: 100%;
+    overflow: hidden;
+}
+
+h3,h4,h5,h6, p, ul, ol, li, dl, dt, dd {
+    color: #000;
 }
 
 #app {
     height: 100%;
+    overflow-block: auto;
 }
+
+
 
 .screen {
     height: 100%;
+    overflow-y: auto;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -23,6 +33,17 @@ body, html {
     width: 350px;
     height: 350px;
     animation: pulse 2.4s infinite;
+}
+
+.welcome-screen{
+   justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.welcome-screen h1{
+    color: black;
+    margin: 10px 60px;
 }
 
 @keyframes pulse {
@@ -50,7 +71,6 @@ body, html {
 }
 
 .exercise-list, .routine-view {
-    background-color: #f0f0f0;
     height: 100%;
     overflow-y: auto;
     padding: 20px;
@@ -60,10 +80,9 @@ body, html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    position: sticky;
+    margin-bottom: 10px;
+    position: relative;
     top: 0;
-    background-color: #f0f0f0;
     padding: 10px 0;
     z-index: 1;
 }
@@ -100,7 +119,8 @@ body, html {
 }
 
 .bottom-nav {
-    position: fixed;
+    position: absolute;
+    margin-top: 20px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -127,7 +147,6 @@ body, html {
 }
 
 .stats-screen, .profile-screen {
-    background-color: #f0f0f0;
     height: 100%;
     overflow-y: auto;
     padding: 20px;
@@ -235,4 +254,11 @@ body, html {
 
 .screen .register-screen .redirect-text{
     color: #aaa;
+}
+
+.imagenes{
+    display: none;
+    img{
+        display: none;
+    }
 }
